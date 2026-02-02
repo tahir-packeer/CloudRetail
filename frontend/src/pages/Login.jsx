@@ -105,9 +105,9 @@ const Login = () => {
             </Link>
           </div>
 
-          {/* Demo Credentials */}
+          {/* Credentials */}
           <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-xs font-semibold text-gray-700 mb-2">Demo Credentials:</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2">Credentials:</p>
             <div className="space-y-1 text-xs text-gray-600">
               <p><strong>Buyer:</strong> buyer@cloudretail.com / Buyer@123</p>
               <p><strong>Seller:</strong> seller@cloudretail.com / Seller@123</p>
