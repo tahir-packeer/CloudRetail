@@ -2,12 +2,8 @@
 
 A full-stack e-commerce platform built with microservices architecture featuring role-based dashboards for Buyers, Sellers, and Admins.
 
-## 🚀 Project Overview
+##  Project Overview
 
-**Assignment:** COMP60010-ECDWA2 E-commerce Platform  
-**Student:** Tahir  
-**Due Date:** February 5, 2026  
-**Status:** ✅ Complete
 
 CloudRetail is a modern e-commerce platform that demonstrates:
 
@@ -18,7 +14,7 @@ CloudRetail is a modern e-commerce platform that demonstrates:
 - Real-time analytics and reporting
 - Responsive React frontend with TailwindCSS
 
-## 🏗️ Architecture
+##  Architecture
 
 ### Backend Services (Node.js + Express)
 
@@ -36,7 +32,7 @@ CloudRetail is a modern e-commerce platform that demonstrates:
 - **Database** - MySQL 8.0 (6 separate databases)
 - **Shared Library** - `@cloudretail/shared` for common utilities
 
-## 📋 Features
+##  Features
 
 ### Buyer Features
 
@@ -62,7 +58,7 @@ CloudRetail is a modern e-commerce platform that demonstrates:
 ✅ Revenue reporting  
 ✅ System health monitoring
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -98,7 +94,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'frontend'; np
 - **Seller:** seller@cloudretail.com / Seller@123
 - **Admin:** admin@cloudretail.com / Admin@123
 
-## 🧪 Testing
+##  Testing
 
 ### Run All Tests
 
@@ -112,13 +108,13 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'frontend'; np
 
 **Test Results:** All 16 tests passing ✅
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 **Backend:** Node.js, Express.js, MySQL, Redis, JWT, Stripe SDK  
 **Frontend:** React 18, Vite, TailwindCSS, React Router, Stripe Elements  
 **Tools:** Axios, Winston, Helmet, CORS, express-rate-limit
 
-## 📊 Key Endpoints
+##  Key Endpoints
 
 ### Authentication
 
@@ -148,7 +144,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'frontend'; np
 - GET `/api/analytics/dashboard` - Platform metrics (admin)
 - GET `/api/analytics/seller/me` - Seller metrics
 
-## 🎯 Assignment Requirements Met
+##  Assignment Requirements Met
 
 ✅ Microservices Architecture (6 services)  
 ✅ API Gateway with rate limiting  
@@ -160,7 +156,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'frontend'; np
 ✅ Testing (16 integration tests)  
 ✅ Documentation (Complete)
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 cloudretail-app/
@@ -179,7 +175,7 @@ cloudretail-app/
 └── test-frontend-integration.ps1  # Frontend tests
 ```
 
-## 🔒 Security Features
+##  Security Features
 
 - JWT-based authentication
 - Password hashing (bcrypt)
@@ -189,14 +185,14 @@ cloudretail-app/
 - SQL injection prevention
 - XSS protection (Helmet)
 
-## 📈 Performance
+##  Performance
 
 - API response time: < 100ms
 - Rate limit: 100 req/min per IP
 - Concurrent users: 100+
 - Database queries: Optimized with indexes
 
-## 👨‍💻 Development
+##  Development
 
 ### Installation
 
@@ -216,11 +212,6 @@ cd frontend && npm install
 
 Each service needs a `.env` file with database credentials and JWT secret.
 
-## 🎉 Status
-
-**Backend:** ✅ 100% Complete (All 6 services + Gateway)  
-**Frontend:** ✅ 100% Complete (Buyer + Seller + Admin)  
-**Testing:** ✅ All tests passing (16/16)  
 **Documentation:** ✅ Complete
 
 ---
