@@ -4,6 +4,8 @@ const redisClient = require('./redis');
 const jwt = require('./jwt');
 const validation = require('./validation');
 const middleware = require('./middleware');
+const { eventBus, Events } = require('./eventBus');
+const CircuitBreaker = require('./circuitBreaker');
 
 module.exports = {
   createLogger,
@@ -12,4 +14,7 @@ module.exports = {
   jwt,
   validation,
   middleware,
+  eventBus,
+  Events,
+  CircuitBreaker,
 };

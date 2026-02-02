@@ -1,4 +1,4 @@
-const { createLogger, validation } = require('@cloudretail/shared');
+const { createLogger, validation, eventBus, Events } = require('@cloudretail/shared');
 const Order = require('../models/Order');
 const axios = require('axios');
 
@@ -99,6 +99,14 @@ const createOrder = async (req, res) => {
 
     // Create order
     const order = await Order.create(orderData);
+
+    // Publish order created event
+    eventBus.publish(Events.ORDER_CREATED, {
+      orderId: order.id,
+      userId: order.userId,
+      total: order.total,
+      items: order.items,
+    });
 
     // Decrement stock for each product
     for (const item of cart.items) {

@@ -3,9 +3,10 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
-const { database, createLogger } = require('@cloudretail/shared');
+const { database, createLogger, eventBus, Events } = require('@cloudretail/shared');
 
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const analyticsController = require('./controllers/analyticsController');
 
 const app = express();
 const logger = createLogger('analytics-service');
@@ -73,6 +74,27 @@ const startServer = async () => {
     });
 
     logger.info('Database connections initialized');
+
+    // Subscribe to events for real-time analytics
+    eventBus.subscribe(Events.ORDER_CREATED, async (event) => {
+      try {
+        await analyticsController.trackOrderEvent(event.data);
+        logger.info('Tracked order created event', { orderId: event.data.orderId });
+      } catch (error) {
+        logger.error('Failed to track order event', { error: error.message });
+      }
+    });
+
+    eventBus.subscribe(Events.PAYMENT_SUCCEEDED, async (event) => {
+      try {
+        await analyticsController.trackPaymentEvent(event.data);
+        logger.info('Tracked payment succeeded event', { paymentId: event.data.paymentId });
+      } catch (error) {
+        logger.error('Failed to track payment event', { error: error.message });
+      }
+    });
+
+    logger.info('Event listeners registered');
 
     app.listen(PORT, () => {
       logger.info(`Analytics service listening on port ${PORT}`);

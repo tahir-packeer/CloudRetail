@@ -1,4 +1,4 @@
-const { createLogger } = require('@cloudretail/shared');
+const { createLogger, eventBus, Events, CircuitBreaker } = require('@cloudretail/shared');
 const Payment = require('../models/Payment');
 const axios = require('axios');
 
@@ -11,6 +11,13 @@ if (process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('yo
 const logger = createLogger('payment-controller');
 const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://localhost:3004';
 const USE_DEMO_MODE = !stripe;
+
+// Circuit breaker for Stripe API calls
+const stripeCircuitBreaker = new CircuitBreaker({
+  serviceName: 'Stripe API',
+  failureThreshold: 3,
+  timeout: 30000, // 30 seconds
+});
 
 /**
  * Create temporary payment intent (before order is created)
@@ -355,6 +362,14 @@ const handlePaymentSucceeded = async (paymentIntent) => {
       }
     );
 
+    // Publish payment succeeded event
+    eventBus.publish(Events.PAYMENT_SUCCEEDED, {
+      paymentId: payment.id,
+      orderId: payment.orderId,
+      userId: payment.userId,
+      amount: payment.amount,
+    });
+
     logger.info('Payment succeeded and order updated', {
       paymentId: payment.id,
       orderId: payment.orderId,
@@ -380,6 +395,14 @@ const handlePaymentFailed = async (paymentIntent) => {
 
   await Payment.updateStatus(payment.id, 'failed', {
     failureMessage: paymentIntent.last_payment_error?.message,
+  });
+
+  // Publish payment failed event
+  eventBus.publish(Events.PAYMENT_FAILED, {
+    paymentId: payment.id,
+    orderId: payment.orderId,
+    userId: payment.userId,
+    reason: paymentIntent.last_payment_error?.message,
   });
 
   logger.info('Payment failed', {

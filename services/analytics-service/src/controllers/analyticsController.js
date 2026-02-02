@@ -238,6 +238,23 @@ const refreshMetrics = async (req, res) => {
   }
 };
 
+/**
+ * Track order event from event bus
+ */
+const trackOrderEvent = async (orderData) => {
+  logger.info('Tracking order event', { orderId: orderData.orderId });
+  // This could write to a separate events table for real-time tracking
+  // For now, metrics will be updated via refreshMetrics
+};
+
+/**
+ * Track payment event from event bus
+ */
+const trackPaymentEvent = async (paymentData) => {
+  logger.info('Tracking payment event', { paymentId: paymentData.paymentId });
+  // This could update real-time revenue metrics
+};
+
 module.exports = {
   getDashboard,
   getSalesData,
@@ -245,4 +262,6 @@ module.exports = {
   getMySellerMetrics,
   getSellerMetrics,  getMySellerSalesData,  getTopSellers,
   refreshMetrics,
+  trackOrderEvent,
+  trackPaymentEvent,
 };
