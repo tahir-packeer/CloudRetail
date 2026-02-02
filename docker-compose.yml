@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: CloudRetail@2026
       MYSQL_DATABASE: auth_db
     ports:
-      - "3306:3306"
+      - "3307:3306"  # Using 3307 to avoid conflict with local MySQL
     volumes:
       - mysql-data:/var/lib/mysql
       - ./infrastructure/mysql:/docker-entrypoint-initdb.d
@@ -24,7 +24,7 @@ services:
     image: redis:7-alpine
     container_name: cloudretail-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"  # Using 6380 to avoid conflict
     volumes:
       - redis-data:/data
     networks:
@@ -38,8 +38,8 @@ services:
   # Auth Service
   auth-service:
     build:
-      context: ./services/auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/auth-service/Dockerfile
     container_name: cloudretail-auth
     ports:
       - "3001:3001"
@@ -62,8 +62,8 @@ services:
   # Catalog Service
   catalog-service:
     build:
-      context: ./services/catalog-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/catalog-service/Dockerfile
     container_name: cloudretail-catalog
     ports:
       - "3002:3002"
@@ -88,8 +88,8 @@ services:
   # Cart Service
   cart-service:
     build:
-      context: ./services/cart-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/cart-service/Dockerfile
     container_name: cloudretail-cart
     ports:
       - "3003:3003"
@@ -114,8 +114,8 @@ services:
   # Order Service
   order-service:
     build:
-      context: ./services/order-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/order-service/Dockerfile
     container_name: cloudretail-order
     ports:
       - "3004:3004"
@@ -139,8 +139,8 @@ services:
   # Payment Service
   payment-service:
     build:
-      context: ./services/payment-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/payment-service/Dockerfile
     container_name: cloudretail-payment
     ports:
       - "3005:3005"
@@ -163,8 +163,8 @@ services:
   # Analytics Service
   analytics-service:
     build:
-      context: ./services/analytics-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/analytics-service/Dockerfile
     container_name: cloudretail-analytics
     ports:
       - "3006:3006"
@@ -185,8 +185,8 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/api-gateway/Dockerfile
     container_name: cloudretail-gateway
     ports:
       - "3000:3000"
@@ -215,8 +215,8 @@ services:
   # Frontend
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./frontend/Dockerfile
     container_name: cloudretail-frontend
     ports:
       - "5173:80"

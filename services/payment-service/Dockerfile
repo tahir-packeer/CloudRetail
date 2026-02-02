@@ -4,19 +4,20 @@ FROM node:18-alpine
 # Create app directory
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
-RUN npm ci --only=production
-
-# Copy shared library
-COPY ../../shared /app/shared
+# Copy and install shared library first
+COPY shared ./shared
 WORKDIR /app/shared
-RUN npm ci --only=production
+RUN npm install --only=production
 RUN npm link
 
+# Install service dependencies
+WORKDIR /app/payment-service
+COPY services/payment-service/package*.json ./
+RUN npm link @cloudretail/shared
+RUN npm install --only=production --legacy-peer-deps
+
 # Copy application code
-WORKDIR /app
-COPY . .
+COPY services/payment-service .
 
 # Link shared library
 RUN npm link @cloudretail/shared

@@ -1,8 +1,10 @@
 # AWS Deployment Guide - CloudRetail E-commerce Platform
+
 **ECDWA2 Assignment - February 2026**
 **Student**: Tahir Nasoordeen Packeer (CB009900)
 
 ## Prerequisites Checklist
+
 - ✅ AWS Account with $100-200 credit
 - ✅ Credit card registered
 - ✅ Docker Desktop installed
@@ -12,6 +14,7 @@
 ## Phase 1: AWS Account Setup (30 minutes)
 
 ### Step 1.1: Create IAM User for Deployment
+
 1. Go to AWS Console → IAM → Users → Create User
 2. Username: `cloudretail-deploy`
 3. Attach policies:
@@ -25,6 +28,7 @@
 4. Create access key → **Save credentials safely**
 
 ### Step 1.2: Install AWS CLI
+
 ```powershell
 # Download and install AWS CLI v2
 winget install -e --id Amazon.AWSCLI
@@ -41,6 +45,7 @@ aws sts get-caller-identity
 ```
 
 ### Step 1.3: Install kubectl and eksctl
+
 ```powershell
 # Install kubectl
 choco install kubernetes-cli
@@ -56,6 +61,7 @@ eksctl version
 ## Phase 2: Container Registry (Amazon ECR) - 15 minutes
 
 ### Step 2.1: Create ECR Repositories
+
 ```powershell
 # Set variables
 $REGION = "ap-southeast-1"
@@ -85,6 +91,7 @@ aws ecr get-login-password --region $REGION | docker login --username AWS --pass
 ```
 
 ### Step 2.2: Build and Push Images
+
 ```powershell
 # Navigate to project root
 cd C:\Users\tahir\Downloads\CloudRetail\cloudretail-app
@@ -103,7 +110,7 @@ $services = @{
 foreach ($dir in $services.Keys) {
     $repoName = $services[$dir]
     $imageUri = "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$repoName`:latest"
-    
+
     Write-Host "Building $dir..."
     docker build -t $repoName "./services/$dir"
     docker tag "$repoName`:latest" $imageUri
@@ -120,6 +127,7 @@ docker push "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/cloudretail-frontend:late
 ## Phase 3: Database Setup (Amazon Aurora MySQL) - 20 minutes
 
 ### Step 3.1: Create Aurora Cluster
+
 ```powershell
 # Create DB subnet group
 aws rds create-db-subnet-group `
@@ -156,6 +164,7 @@ aws rds wait db-cluster-available --db-cluster-identifier cloudretail-cluster --
 ```
 
 ### Step 3.2: Get Database Endpoint
+
 ```powershell
 $DB_ENDPOINT = (aws rds describe-db-clusters `
     --db-cluster-identifier cloudretail-cluster `
@@ -168,6 +177,7 @@ Write-Host "Database Endpoint: $DB_ENDPOINT" -ForegroundColor Yellow
 ```
 
 ### Step 3.3: Initialize Databases
+
 ```powershell
 # Connect via MySQL client (install if needed: choco install mysql)
 mysql -h $DB_ENDPOINT -u admin -p
@@ -190,6 +200,7 @@ SOURCE C:/Users/tahir/Downloads/CloudRetail/cloudretail-app/services/auth-servic
 ## Phase 4: Kubernetes Cluster (Amazon EKS) - 30 minutes
 
 ### Step 4.1: Create EKS Cluster
+
 ```powershell
 # Create EKS cluster with Fargate profile (serverless)
 eksctl create cluster `
@@ -211,6 +222,7 @@ kubectl get namespaces
 ```
 
 ### Step 4.2: Create Kubernetes Secrets
+
 ```powershell
 # Create secret for database credentials
 kubectl create secret generic db-credentials `
@@ -232,6 +244,7 @@ kubectl create secret generic stripe-secret `
 ```
 
 ### Step 4.3: Create Kubernetes Deployments
+
 Create file: `k8s-deployments.yaml`
 
 ```yaml
@@ -251,33 +264,33 @@ spec:
         app: auth-service
     spec:
       containers:
-      - name: auth-service
-        image: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/cloudretail-auth:latest
-        ports:
-        - containerPort: 3001
-        env:
-        - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_HOST
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_USER
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_PASSWORD
-        - name: DB_NAME
-          value: "auth_db"
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: jwt-secret
-              key: JWT_SECRET
+        - name: auth-service
+          image: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/cloudretail-auth:latest
+          ports:
+            - containerPort: 3001
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_HOST
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DB_PASSWORD
+            - name: DB_NAME
+              value: 'auth_db'
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_SECRET
 ---
 apiVersion: v1
 kind: Service
@@ -286,8 +299,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 3001
-    targetPort: 3001
+    - port: 3001
+      targetPort: 3001
   selector:
     app: auth-service
 ---
@@ -302,6 +315,7 @@ spec:
 ```
 
 ### Step 4.4: Deploy to Kubernetes
+
 ```powershell
 # Replace placeholders in k8s-deployments.yaml
 (Get-Content k8s-deployments.yaml) `
@@ -325,6 +339,7 @@ kubectl get service frontend -o jsonpath='{.status.loadBalancer.ingress[0].hostn
 ## Phase 5: S3 for Image Storage - 10 minutes
 
 ### Step 5.1: Create S3 Bucket
+
 ```powershell
 $BUCKET_NAME = "cloudretail-product-images-$(Get-Random)"
 
@@ -362,6 +377,7 @@ aws s3api put-bucket-policy --bucket $BUCKET_NAME --policy '{
 ```
 
 ### Step 5.2: Update Catalog Service Environment
+
 ```powershell
 # Add S3 bucket name to Kubernetes secret
 kubectl create secret generic s3-config `
@@ -377,6 +393,7 @@ kubectl rollout restart deployment/catalog-service
 ## Phase 6: EventBridge for Event-Driven Architecture - 15 minutes
 
 ### Step 6.1: Create Event Bus
+
 ```powershell
 # Create custom event bus
 aws events create-event-bus `
@@ -404,6 +421,7 @@ aws events put-targets `
 ```
 
 ### Step 6.2: Create Lambda for Event Processing (Optional)
+
 ```powershell
 # Create Lambda function for analytics event processing
 # (This would process events and update real-time metrics)
@@ -413,6 +431,7 @@ aws events put-targets `
 ## Phase 7: Monitoring & Observability - 20 minutes
 
 ### Step 7.1: Enable Container Insights
+
 ```powershell
 # Install CloudWatch agent
 eksctl create iamserviceaccount `
@@ -429,6 +448,7 @@ kubectl apply -f https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch
 ```
 
 ### Step 7.2: Create CloudWatch Dashboard
+
 ```powershell
 # Create dashboard JSON (dashboard.json)
 $dashboardBody = @"
@@ -460,6 +480,7 @@ aws cloudwatch put-dashboard `
 ## Phase 8: Testing & Validation - 30 minutes
 
 ### Step 8.1: Load Testing with k6
+
 ```powershell
 # Install k6
 choco install k6
@@ -495,6 +516,7 @@ k6 run loadtest.js --out json=loadtest-results.json
 ```
 
 ### Step 8.2: Verify All Services
+
 ```powershell
 # Get API Gateway URL
 $API_URL = kubectl get service api-gateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
@@ -520,6 +542,7 @@ foreach ($endpoint in $endpoints) {
 ## Phase 9: Cost Optimization
 
 ### Estimated Monthly Costs:
+
 - **EKS Cluster**: $73/month (control plane)
 - **Fargate**: ~$50/month (2 vCPU, 4GB RAM per service × 8 services)
 - **Aurora Serverless v2**: ~$40/month (0.5-2 ACU)
@@ -527,9 +550,10 @@ foreach ($endpoint in $endpoints) {
 - **EventBridge**: ~$1/month (1M events)
 - **CloudWatch**: ~$10/month (logs, metrics)
 - **Data Transfer**: ~$20/month
-**Total**: ~$200/month (within budget)
+  **Total**: ~$200/month (within budget)
 
 ### Cost-Saving Tips:
+
 1. Use Fargate Spot for non-critical workloads
 2. Enable Aurora auto-pause after 5 minutes
 3. Set S3 lifecycle policies (delete old images after 90 days)
@@ -539,6 +563,7 @@ foreach ($endpoint in $endpoints) {
 ## Phase 10: Documentation & Submission
 
 ### Architecture Diagram Checklist:
+
 - ✅ VPC with subnets (public/private)
 - ✅ EKS cluster with Fargate nodes
 - ✅ Aurora MySQL cluster (multi-AZ)
@@ -549,6 +574,7 @@ foreach ($endpoint in $endpoints) {
 - ✅ All 8 microservices
 
 ### Final Report Sections:
+
 1. **Architecture Design** (20%):
    - Cloud architecture diagram
    - Service interaction diagram
@@ -575,6 +601,7 @@ foreach ($endpoint in $endpoints) {
    - Viva voce preparation
 
 ### Cleanup After Submission:
+
 ```powershell
 # Delete EKS cluster (IMPORTANT: Saves $200/month!)
 eksctl delete cluster --name cloudretail-cluster --region $REGION
@@ -598,12 +625,14 @@ aws events delete-event-bus --name cloudretail-events --region $REGION
 ## Troubleshooting
 
 ### Issue: Pods not starting
+
 ```powershell
 kubectl describe pod [pod-name]
 kubectl logs [pod-name]
 ```
 
 ### Issue: Can't connect to database
+
 ```powershell
 # Check security group allows EKS node IPs
 aws ec2 describe-security-groups --group-ids sg-xxxxx
@@ -613,6 +642,7 @@ kubectl run -it --rm debug --image=mysql:8.0 --restart=Never -- mysql -h $DB_END
 ```
 
 ### Issue: Load balancer not accessible
+
 ```powershell
 # Check service type is LoadBalancer
 kubectl get service api-gateway -o yaml
@@ -622,6 +652,7 @@ kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controll
 ```
 
 ## Success Criteria Checklist:
+
 - ✅ All 8 services running in EKS
 - ✅ Aurora database connected
 - ✅ S3 image storage working
