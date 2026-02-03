@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { signIn, signUp, signOut, fetchAuthSession, fetchUserAttributes, getCurrentUser } from 'aws-amplify/auth';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -17,40 +18,84 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (token && storedUser) {
+    // Check if user is logged in with Cognito
+    const checkUser = async () => {
       try {
-        setUser(JSON.parse(storedUser));
+        const currentUser = await getCurrentUser();
+        const session = await fetchAuthSession();
+        const attributes = await fetchUserAttributes();
+        
+        if (session.tokens) {
+          const token = session.tokens.idToken.toString();
+          const groups = session.tokens.idToken.payload['cognito:groups'] || [];
+          const role = groups[0] || 'buyer'; // Default to buyer if no group
+          
+          const userData = {
+            id: currentUser.userId,
+            email: attributes.email,
+            role: role
+          };
+          
+          // Store token and user data
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(userData));
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          
+          setUser(userData);
+        }
       } catch (error) {
+        // User not logged in
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        setUser(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+    
+    checkUser();
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const { accessToken, user: userData } = response.data.data;
+      // First try to sign out if there's an existing session
+      try {
+        await signOut();
+      } catch (e) {
+        // Ignore signout errors
+      }
       
-      // Store token and user data
-      localStorage.setItem('token', accessToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      const { isSignedIn, nextStep } = await signIn({
+        username: email,
+        password: password
+      });
       
-      // Update user state
-      setUser(userData);
-      
-      // Set the token in axios default headers to ensure it's used immediately
-      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      
-      toast.success('Login successful!');
-      return userData;
+      if (isSignedIn) {
+        // Get user session and attributes
+        const session = await fetchAuthSession();
+        const attributes = await fetchUserAttributes();
+        const currentUser = await getCurrentUser();
+        
+        const token = session.tokens.idToken.toString();
+        const groups = session.tokens.idToken.payload['cognito:groups'] || [];
+        const role = groups[0] || 'buyer';
+        
+        const userData = {
+          id: currentUser.userId,
+          email: attributes.email,
+          role: role
+        };
+        
+        // Store token and user data
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        
+        setUser(userData);
+        toast.success('Login successful!');
+        return userData;
+      }
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.message || 'Login failed';
       toast.error(message);
       throw error;
     }
@@ -58,21 +103,35 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
-      toast.success('Registration successful! Please login.');
-      return response.data;
+      const { isSignUpComplete, userId, nextStep } = await signUp({
+        username: userData.email,
+        password: userData.password,
+        options: {
+          userAttributes: {
+            email: userData.email
+          }
+        }
+      });
+      
+      toast.success('Registration successful! Please check your email for verification code.');
+      return { isSignUpComplete, userId, nextStep };
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
+      const message = error.message || 'Registration failed';
       toast.error(message);
       throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    toast.success('Logged out successfully');
+  const logout = async () => {
+    try {
+      await signOut();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const value = {

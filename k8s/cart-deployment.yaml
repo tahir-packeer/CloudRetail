@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: cart-service
-        image: REPLACE_WITH_ECR_URI/cloudretail-cart:latest
+        image: 977098992607.dkr.ecr.ap-southeast-1.amazonaws.com/cloudretail-cart:latest
         ports:
         - containerPort: 3003
         env:
@@ -82,6 +82,21 @@ spec:
             configMapKeyRef:
               name: cloudretail-config
               key: CATALOG_SERVICE_URL
+        - name: COGNITO_USER_POOL_ID
+          valueFrom:
+            configMapKeyRef:
+              name: cloudretail-config
+              key: COGNITO_USER_POOL_ID
+        - name: COGNITO_CLIENT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: cloudretail-config
+              key: COGNITO_CLIENT_ID
+        - name: COGNITO_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: cloudretail-config
+              key: COGNITO_REGION
         resources:
           requests:
             memory: "256Mi"
