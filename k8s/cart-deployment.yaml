@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-service
+  namespace: default
+spec:
+  selector:
+    app: cart-service
+  ports:
+    - protocol: TCP
+      port: 3003
+      targetPort: 3003
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+      - name: cart-service
+        image: REPLACE_WITH_ECR_URI/cloudretail-cart:latest
+        ports:
+        - containerPort: 3003
+        env:
+        - name: PORT
+          value: "3003"
+        - name: NODE_ENV
+          value: "production"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cloudretail-secrets
+              key: jwt-secret
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: cloudretail-secrets
+              key: db-host
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: cloudretail-secrets
+              key: db-user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cloudretail-secrets
+              key: db-password
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: cloudretail-secrets
+              key: db-port
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: cloudretail-config
+              key: CART_DB
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: cloudretail-config
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: cloudretail-config
+              key: REDIS_PORT
+        - name: CATALOG_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: cloudretail-config
+              key: CATALOG_SERVICE_URL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3003
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3

@@ -64,16 +64,26 @@ const Cart = () => {
   const totalAmount = cart?.items?.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) || 0;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-200px)]">
       <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
 
       {!cart?.items || cart.items.length === 0 ? (
-        <div className="text-center py-12 card">
-          <ShoppingBag className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 text-lg mb-4">Your cart is empty</p>
-          <button onClick={() => navigate('/')} className="btn btn-primary">
-            Continue Shopping
-          </button>
+        <div className="flex items-center justify-center min-h-[500px]">
+          <div className="text-center py-16 px-8 card max-w-md w-full">
+            <div className="bg-blue-50 rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag className="h-16 w-16 text-blue-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">Your cart is empty</h2>
+            <p className="text-gray-600 mb-8">
+              Looks like you haven't added any items to your cart yet.
+            </p>
+            <button 
+              onClick={() => navigate('/')} 
+              className="btn btn-primary w-full py-3 text-lg"
+            >
+              Start Shopping
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

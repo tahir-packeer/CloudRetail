@@ -70,7 +70,17 @@ const AddProduct = () => {
       navigate('/seller');
     } catch (error) {
       console.error('Create product error:', error.response?.data || error);
-      toast.error(error.response?.data?.message || 'Failed to add product');
+      const errorMsg = error.response?.data?.message || 'Failed to add product';
+      const errors = error.response?.data?.errors;
+      
+      if (errors) {
+        // Show specific validation errors
+        Object.keys(errors).forEach(field => {
+          toast.error(`${field}: ${errors[field]}`);
+        });
+      } else {
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -91,7 +101,7 @@ const AddProduct = () => {
       <form onSubmit={handleSubmit} className="card space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Product Name *
+            Product Name * (3-200 characters)
           </label>
           <input
             type="text"
@@ -99,24 +109,33 @@ const AddProduct = () => {
             value={formData.name}
             onChange={handleChange}
             required
+            minLength={3}
+            maxLength={200}
             className="input w-full"
             placeholder="Enter product name"
           />
+          <p className="text-sm text-gray-500 mt-1">
+            {formData.name.length} / 200 characters
+          </p>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description *
+            Description * (minimum 10 characters)
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             required
+            minLength={10}
             rows={4}
             className="input w-full"
-            placeholder="Enter product description"
+            placeholder="Enter product description (at least 10 characters)"
           />
+          <p className="text-sm text-gray-500 mt-1">
+            {formData.description.length} characters
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
