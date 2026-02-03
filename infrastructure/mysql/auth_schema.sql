@@ -55,12 +55,12 @@ CREATE TABLE IF NOT EXISTS seller_profiles (
     INDEX idx_rating (rating)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default admin user (password: Admin@123)
+-- Insert default admin user (password: Password123!)
 INSERT INTO users (email, password_hash, first_name, last_name, role, status, email_verified)
 VALUES 
-('admin@cloudretail.com', '$2b$10$Xh5R5Y9K3xqF7tZKZJUvOuVzK5YwY8/hzJ.XD7mH3eGN5X8FqEDGi', 'System', 'Admin', 'admin', 'active', TRUE),
-('seller@cloudretail.com', '$2b$10$Xh5R5Y9K3xqF7tZKZJUvOuVzK5YwY8/hzJ.XD7mH3eGN5X8FqEDGi', 'Demo', 'Seller', 'seller', 'active', TRUE),
-('buyer@cloudretail.com', '$2b$10$Xh5R5Y9K3xqF7tZKZJUvOuVzK5YwY8/hzJ.XD7mH3eGN5X8FqEDGi', 'Demo', 'Buyer', 'buyer', 'active', TRUE)
+('admin@cloudretail.com', '$2b$10$oOEpidhz.w0lX0IHMM83lOc/fbdGHhMThHM8Bl7VR9br8.WzBjjcq', 'System', 'Admin', 'admin', 'active', TRUE),
+('seller@cloudretail.com', '$2b$10$oOEpidhz.w0lX0IHMM83lOc/fbdGHhMThHM8Bl7VR9br8.WzBjjcq', 'Demo', 'Seller', 'seller', 'active', TRUE),
+('buyer@cloudretail.com', '$2b$10$oOEpidhz.w0lX0IHMM83lOc/fbdGHhMThHM8Bl7VR9br8.WzBjjcq', 'Demo', 'Buyer', 'buyer', 'active', TRUE)
 ON DUPLICATE KEY UPDATE id=id;
 
 -- Insert seller profile for demo seller
