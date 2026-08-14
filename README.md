@@ -60,29 +60,6 @@ CloudRetail is a modern e-commerce platform that demonstrates:
 
 ##  Quick Start
 
-### Prerequisites
-
-- Node.js v24+ installed
-- MySQL 8.0 running
-- PowerShell (Windows)
-
-### Start All Services
-
-```powershell
-# Navigate to project directory
-cd c:\Users\tahir\Downloads\CloudRetail\cloudretail-app
-
-# Start all 7 backend services + frontend (opens 8 PowerShell windows)
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'services\auth-service'; node src/index.js"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'services\catalog-service'; node src/index.js"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'services\cart-service'; node src/index.js"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'services\order-service'; node src/index.js"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'services\payment-service'; node src/index.js"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'services\analytics-service'; node src/index.js"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'services\api-gateway'; node src/index.js"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'frontend'; npm run dev"
-```
-
 ### Access the Application
 
 - **Frontend:** http://localhost:5173
@@ -94,19 +71,6 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'frontend'; np
 - **Seller:** seller@cloudretail.com / Seller@123
 - **Admin:** admin@cloudretail.com / Admin@123
 
-##  Testing
-
-### Run All Tests
-
-```powershell
-# Gateway integration tests (9 tests)
-.\test-gateway.ps1
-
-# Frontend integration tests (7 tests)
-.\test-frontend-integration.ps1
-```
-
-**Test Results:** All 16 tests passing ✅
 
 ##  Technology Stack
 
@@ -144,18 +108,6 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'frontend'; np
 - GET `/api/analytics/dashboard` - Platform metrics (admin)
 - GET `/api/analytics/seller/me` - Seller metrics
 
-##  Assignment Requirements Met
-
-✅ Microservices Architecture (6 services)  
-✅ API Gateway with rate limiting  
-✅ Role-Based Access Control  
-✅ Payment Integration (Stripe)  
-✅ React Frontend (Buyer/Seller/Admin)  
-✅ Database Design (Normalized, 6 DBs)  
-✅ Authentication (JWT)  
-✅ Testing (16 integration tests)  
-✅ Documentation (Complete)
-
 ##  Project Structure
 
 ```
@@ -185,35 +137,9 @@ cloudretail-app/
 - SQL injection prevention
 - XSS protection (Helmet)
 
-##  Performance
 
-- API response time: < 100ms
-- Rate limit: 100 req/min per IP
-- Concurrent users: 100+
-- Database queries: Optimized with indexes
 
-##  Development
 
-### Installation
 
-```bash
-# Install shared library
-cd shared && npm install && npm link
 
-# Install all services
-cd services/auth-service && npm install
-# Repeat for all services
 
-# Install frontend
-cd frontend && npm install
-```
-
-### Environment Setup
-
-Each service needs a `.env` file with database credentials and JWT secret.
-
-**Documentation:** ✅ Complete
-
----
-
-**Project Ready for Submission** 🚀
